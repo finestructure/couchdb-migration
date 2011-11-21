@@ -22,7 +22,7 @@ class TestMigration(unittest.TestCase):
     self.db = self.server[DBNAME]
     
     for i in range(1,5):
-      self.db.save(make_player('Player %d', 1))
+      self.db.save(make_player('Player %d', version=1))
   
   def tearDown(self):
     pass
