@@ -9,7 +9,6 @@ DBNAME = 'migration'
 def make_player(name, version):
   # create some test data for different document versions
   player = {
-    'type':'player',
     'version':version,
     'name:':name,
     'xp':int(1000*random.random())
