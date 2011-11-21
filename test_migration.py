@@ -7,6 +7,7 @@ DBNAME = 'migration'
 
 
 def make_player(name, version):
+  # create some test data for different document versions
   player = {
     'type':'player',
     'version':version,
@@ -96,6 +97,7 @@ class TestMigration(unittest.TestCase):
 
   def test_02_migrate_v1_v2(self):
     migrate_v1_v2(self.db)
+    
     v1 = self.db.view('_design/migration/_view/v1')
     self.assertEqual(0, len(v1.rows))
 
@@ -114,23 +116,38 @@ class TestMigration(unittest.TestCase):
 
   def test_03_migrate_v2_v3(self):
     migrate_v2_v3(self.db)
+    
     v1 = self.db.view('_design/migration/_view/v1')
     self.assertEqual(4, len(v1.rows))
+    for row in v1.rows:
+      doc = self.db[row.key]
+      with self.assertRaises(KeyError):
+        doc['level']
+
     v2 = self.db.view('_design/migration/_view/v2')
     self.assertEqual(0, len(v2.rows))
+
     v3 = self.db.view('_design/migration/_view/v3')
     self.assertEqual(11, len(v3.rows))
+    for row in v3.rows:
+      doc = self.db[row.key]
+      self.assertEqual(doc['xp']/200 + 1, doc['level'])
 
 
   def test_03_migrate_v1_v3(self):
     migrate_v1_v2(self.db)
     migrate_v2_v3(self.db)
+    
     v1 = self.db.view('_design/migration/_view/v1')
     self.assertEqual(0, len(v1.rows))
     v2 = self.db.view('_design/migration/_view/v2')
     self.assertEqual(0, len(v2.rows))
+    
     v3 = self.db.view('_design/migration/_view/v3')
     self.assertEqual(15, len(v3.rows))
+    for row in v3.rows:
+      doc = self.db[row.key]
+      self.assertEqual(doc['xp']/200 + 1, doc['level'])
 
 
 if __name__=='__main__':
